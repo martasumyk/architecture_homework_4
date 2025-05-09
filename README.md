@@ -24,7 +24,7 @@ How alerts work: if a user sends personal data (e.g. "password", "email", etc.),
 
   Celery workers handle tasks in the background. For example, if Service 1 gets a message that needs time to process (like analyzing data), it sends that job to Celery and moves on quickly without waiting. Celery picks it up later and does the work.
 
-## Task Flow (Sync vs Async)
+## Task Flow (sync or async)
 
 Here's how data flows through the system and which parts are **synchronous** and **asynchronous**:
 
@@ -37,3 +37,16 @@ Here's how data flows through the system and which parts are **synchronous** and
 | 5 | Some messages are forwarded to `service_2` | `service_1` to `service_2` | **Synchronous** |
 
 ---
+
+## Scaling the system
+
+Let’s imagine more users start using the system at the same time. To handle more users efficiently, the system needs to scale based on the number of simultaneous connections. With 10 users, a single instance of each service and two Celery workers are sufficient. For 50 users, adding one more service_1 container and two more workers improves performance. At 100 or more connections, a load balancer should be added in front of multiple service_1 instances, and Celery workers should be increased to 6–10. Redis may also need to be upgraded to a managed or clustered setup, and logging should be centralized then and viewed carefully for better performance.
+
+
+
+
+
+
+
+
+

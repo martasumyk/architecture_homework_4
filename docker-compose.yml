@@ -1,19 +1,44 @@
 version: '3.8'
 
 services:
-  service_a:
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  service_1:
     build: ./app
     volumes:
       - ./logs:/app/logs
       - ./error_reports:/app/error_reports
     command: python service_1.py
     depends_on:
-      - service_2
+      - redis
+      - worker1
+      - worker2
 
-  service_b:
+  service_2:
     build: ./app
     ports:
       - "5001:5001"
+    volumes:
+      - ./logs:/app/logs
+      - ./error_reports:/app/error_reports
+
+  worker1:
+    build: ./app
+    command: celery -A tasks worker --loglevel=info --concurrency=1
+    depends_on:
+      - redis
+    volumes:
+      - ./logs:/app/logs
+      - ./error_reports:/app/error_reports
+
+  worker2:
+    build: ./app
+    command: celery -A tasks worker --loglevel=info --concurrency=1
+    depends_on:
+      - redis
     volumes:
       - ./logs:/app/logs
       - ./error_reports:/app/error_reports
